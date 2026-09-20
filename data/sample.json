@@ -1,0 +1,9 @@
+{
+  "event_id": "092102-009-sample-001",
+  "event_type": "ASSET_GENERATED",
+  "aggregate_type": "production_asset",
+  "aggregate_id": "ai_microdrama_production-001",
+  "occurred_at": "2026-09-20T12:00:00+08:00",
+  "version": 1,
+  "summary": "AI短剧制片总账领域样例"
+}
