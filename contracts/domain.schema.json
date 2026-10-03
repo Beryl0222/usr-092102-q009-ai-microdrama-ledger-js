@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-microdrama.example/contracts/domain.schema.json",
   "title": "AI短剧制片总账领域事件",
+  "description": "信封 7 个必填字段与既有事件/聚合保持兼容；新增字段全部可选，新增枚举值只做加法。",
   "type": "object",
   "required": [
     "event_id",
@@ -23,7 +25,27 @@
         "CUT_SEALED",
         "TIER_ASSESSED",
         "REVIEW_DECIDED",
-        "RELEASE_DELIVERED"
+        "RELEASE_DELIVERED",
+        "PRODUCTION_OPENED",
+        "SCOPE_FROZEN",
+        "SCOPE_REVISED",
+        "SCRIPT_RIGHT_REGISTERED",
+        "CHARACTER_REGISTERED",
+        "SCENE_REGISTERED",
+        "CONTINUITY_BASELINE_LOCKED",
+        "PROMPT_DIGEST_RECORDED",
+        "SHOT_REJECTED",
+        "HUMAN_REVISION_RECORDED",
+        "AUDIO_ADDED",
+        "COST_POSTED",
+        "CONTRIBUTION_POSTED",
+        "CUT_REVISED",
+        "REVIEW_SUBMITTED",
+        "REVIEW_RESUBMITTED",
+        "REREVIEW_TRIGGERED",
+        "MASTER_RELEASED",
+        "OVERSEAS_VERSION_CREATED",
+        "DISTRIBUTION_SUSPENDED"
       ]
     },
     "aggregate_type": {
@@ -32,7 +54,18 @@
         "production_asset",
         "episode_cut",
         "review_submission",
-        "contribution_entry"
+        "contribution_entry",
+        "production",
+        "script_right",
+        "character_asset",
+        "scene_asset",
+        "continuity_baseline",
+        "prompt_input",
+        "shot",
+        "audio_track",
+        "cost_entry",
+        "master_release",
+        "distribution_grant"
       ]
     },
     "aggregate_id": {
@@ -50,7 +83,70 @@
     "summary": {
       "type": "string",
       "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "外部工具回调乱序或重试时复用；同一聚合流内只登记一次。"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "causation_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "signature": { "$ref": "#/$defs/signature" },
+    "lineage": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lineageRef" }
+    },
+    "payload": {
+      "type": "object",
+      "description": "事件业务载荷；最低键集合见 README 事件目录，允许追加键。",
+      "additionalProperties": true
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "$defs": {
+    "signature": {
+      "type": "object",
+      "required": ["signer_id", "signer_role", "algorithm", "value", "signed_at"],
+      "properties": {
+        "signer_id": { "type": "string", "minLength": 1 },
+        "signer_role": {
+          "type": "string",
+          "enum": [
+            "scriptwriter",
+            "director",
+            "storyboard",
+            "generator",
+            "editor",
+            "voice",
+            "producer",
+            "finance",
+            "platform_reviewer",
+            "provincial_reviewer",
+            "compliance_admin"
+          ]
+        },
+        "algorithm": { "type": "string", "enum": ["HS256"] },
+        "value": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "signed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "lineageRef": {
+      "type": "object",
+      "required": ["aggregate_type", "aggregate_id", "version"],
+      "properties": {
+        "aggregate_type": { "type": "string", "minLength": 1 },
+        "aggregate_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
 }
