@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledger.ai-microdrama.local/contracts/domain.schema.json",
   "title": "AI短剧制片总账领域事件",
+  "description": "事件信封在 v1 基础上只增不改：既有 event_type / aggregate_type 枚举值保持原义与原顺序；version 始终表示聚合流内的追加序号，从 1 起逐加 1，不表示结构版本。业务负载统一放在可选 payload 中，结构版本另记 payload.schema_version。",
   "type": "object",
   "required": [
     "event_id",
@@ -14,7 +16,8 @@
   "properties": {
     "event_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "事件全局唯一标识，重复登记同一 event_id 只保留首次。"
     },
     "event_type": {
       "type": "string",
@@ -23,7 +26,28 @@
         "CUT_SEALED",
         "TIER_ASSESSED",
         "REVIEW_DECIDED",
-        "RELEASE_DELIVERED"
+        "RELEASE_DELIVERED",
+        "SCRIPT_RIGHTS_REGISTERED",
+        "PRODUCTION_SCOPE_FROZEN",
+        "PRODUCTION_SCOPE_AMENDED",
+        "CHARACTER_BASELINE_LOCKED",
+        "SHOT_REJECTED",
+        "SHOT_REGENERATION_REQUESTED",
+        "SHOT_MANUALLY_REVISED",
+        "TAKE_ACCEPTED",
+        "VOICE_MUSIC_LINKED",
+        "CONTRIBUTION_LEDGERED",
+        "COST_LEDGERED",
+        "REVIEW_PATH_SUGGESTED",
+        "REVIEW_CLASSIFICATION_SIGNED",
+        "REVIEW_SUBMITTED",
+        "REVIEW_RETURNED",
+        "REVIEW_APPROVED",
+        "REVIEW_RESUBMITTED",
+        "REVIEW_REASSESSMENT_TRIGGERED",
+        "MASTER_REPLACED",
+        "RELEASE_PACKAGE_PUBLISHED",
+        "RELEASE_ACCESS_GRANTED"
       ]
     },
     "aggregate_type": {
@@ -32,7 +56,13 @@
         "production_asset",
         "episode_cut",
         "review_submission",
-        "contribution_entry"
+        "contribution_entry",
+        "script_rights",
+        "production_scope",
+        "character_baseline",
+        "shot",
+        "episode_review",
+        "release_package"
       ]
     },
     "aggregate_id": {
@@ -45,11 +75,49 @@
     },
     "version": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 1,
+      "description": "该聚合流内的事件序号，从 1 起连续递增；同一 aggregate_id 不允许跳号或复用。"
     },
     "summary": {
       "type": "string",
       "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "外部工具回调幂等键：同键重复或乱序送达，只登记一次真实产物。"
+    },
+    "actor": {
+      "type": "object",
+      "description": "登记该事件的人员或系统身份；签署类事件必须携带具备权限的真人签署人。",
+      "properties": {
+        "person_id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string" },
+        "roles": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["person_id"]
+    },
+    "causation_id": {
+      "type": "string",
+      "description": "触发本事件的命令或上游事件 id，用于外部回调与真实产物的对应。"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "贯穿同一制作流程（如一集制作、一次送审）的关联 id。"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "payload 结构版本，独立于信封 version，按事件类型各自演进。"
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

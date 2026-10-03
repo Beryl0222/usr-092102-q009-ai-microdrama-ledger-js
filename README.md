@@ -1,15 +1,51 @@
 # AI短剧制片总账
 
-本仓库保存AI短剧制片总账的领域词汇、事件约定与基础校验代码，便于各参与方在后续开发中统一对象身份和版本语义。
+把并行生产数十集的关键事实串成一条**有向谱系 + 追加式事件账本**：剧本权利、角色与场景资产、提示输入摘要、模型版本、镜头生成/人工修订、配音音乐、人员贡献与分账、实际成本、成片校验值、审核轮次与发行交付。
+
+## 解决什么
+
+| 痛点 | 机制 |
+|---|---|
+| 角色图/场景片段散落多工具账号，靠文件名无法证明播出的是哪套资产 | 每个真实产物按 `content_hash` + 谱系边 `source_asset_ids` 登记，一帧可回溯完整来源链 |
+| 外部工具回调乱序/重试 | `event_id` 与 `idempotency_key`（业务指纹）双重幂等，只登记一次真实产物 |
+| 被否决镜头被改头换面混入后继集次 | 按 id 与 hash 双向拉黑，任意深度来源检查；跨集永久有效 |
+| 跨集复用角色走形 | `CHARACTER_BASELINE_LOCKED` 锁定连续性基线指纹，不一致拒绝 |
+| 财务投资额变化导致审核档位跳变 | 依据**冻结口径**给出建议路径；口径/累计成本跨档、重剪、海外版**精确触发**重审 |
+| 系统自动分类越权 | 建议仅为 advisory；最终分类与内容决定必须由有权人员签署，覆盖建议须留理由 |
+| 发行平台看到过多内部素材 | 发行投影只给母版/节目编号/权利证明；提示词与个人素材留在内部总账 |
+| 创作者无法核对署名分账、监管需要完整历史 | 创作者对账单与监管完整卷宗（每次提交/退回/替换一条不删） |
 
 ## 目录
 
-- `contracts/domain.schema.json`：领域事件信封及稳定枚举。
-- `data/sample.json`：一条可用于联调的中文业务样例。
-- `src/`：事件基础字段校验。
-- `tests/`：领域资料的一致性检查。
+- `contracts/domain.schema.json`：领域事件信封、26 种事件 / 10 种聚合枚举（v1 的 5 事件/4 聚合保持原义）。
+- `src/domain.js`：事件/聚合/题材/路径/触发类型词汇表与版本策略。
+- `src/errors.js`：机器可读错误码。
+- `src/ledger.js`：追加式事件账本（幂等、流版本、冻结存储）。
+- `src/state.js`：事件归约（v1 无 payload 事件同样可回放）。
+- `src/lineage.js`：有向谱系、否决拉黑、基线锁定、帧溯源。
+- `src/review.js`：审核建议规则、跨档检测、精确重审判定。
+- `src/release.js`：来源链洁净检查与发行最小披露投影。
+- `src/projections.js`：资产目录、创作者对账、监管卷宗、制片主管总览。
+- `src/service.js`：应用服务（命令→事件，集中执行权限/签署/谱系准入/重审联动）。
+- `scripts/scenario.js` + `scripts/build-lifecycle.mjs`：两集完整生命周期联调场景与数据生成。
+- `data/sample.json`：v1 一条基础样例；`data/lifecycle.json`：端到端联调数据。
+- `docs/event-catalog.md`：事件目录、版本策略、不变量、重审规则、披露边界。
+- `tests/`：契约兼容、账本幂等、谱系/基线、审核/重审、发行/投影共 30 个用例。
 
-当前核心对象为production_asset、episode_cut、review_submission、contribution_entry，已登记事件为ASSET_GENERATED、CUT_SEALED、TIER_ASSESSED、REVIEW_DECIDED、RELEASE_DELIVERED。这些资料只约束基础交换格式，具体业务服务需要在保持兼容的前提下继续建设。
+## 快速验证
+
+```bash
+npm test
+node scripts/build-lifecycle.mjs
+```
+
+## 关键设计
+
+**版本**：信封 `version` = 聚合流内序号（非结构版本）；payload 结构版本在 `payload.schema_version`。旧事件枚举只增不删、无 payload 旧信封继续有效。详见 `docs/event-catalog.md`。
+
+**审核路径**：平台自审 / 省级送审 / 国家级送审三层；系统按冻结题材与投资额取更严者建议，分类签署人可覆盖但须担责留痕。阈值表可注入（`src/review.js`），默认数值仅为联调示例。
+
+**披露**：内部总账完整留痕（含提示摘要、个人素材引用关系）；对外只有 `releaseView` 投影的最小字段集。
 
 ## 本地检查
 

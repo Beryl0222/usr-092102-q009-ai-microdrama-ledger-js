@@ -1,0 +1,1967 @@
+{
+  "description": "AI短剧制片总账端到端联调样例：剧本权利→口径/建议→基线锁定→生成/否决/修订→配音音乐→贡献成本→签署送审→精确重审→放行最小披露",
+  "generated_at": "2026-09-21T18:00:00+08:00",
+  "event_count": 70,
+  "invariants_blocked": [
+    {
+      "case": "rejected_ancestor_reuse",
+      "blocked": true,
+      "code": "REJECTED_ANCESTOR",
+      "message": "资产 ep01-take-x 的来源 ep01-take-a 属于被否决镜头，禁止混入后继集次",
+      "details": {
+        "candidate": "ep01-take-x",
+        "rejected_ancestor": "ep01-take-a"
+      }
+    },
+    {
+      "case": "baseline_not_locked",
+      "blocked": true,
+      "code": "BASELINE_NOT_LOCKED",
+      "message": "角色 char-b 尚未锁定连续性基线，跨集复用前必须先锁定"
+    },
+    {
+      "case": "baseline_drift",
+      "blocked": true,
+      "code": "BASELINE_DRIFT",
+      "message": "资产 char-a-v2-drift 偏离角色 char-a 的锁定基线",
+      "details": {
+        "character_id": "char-a",
+        "expected": "hash-char-a-v1",
+        "actual": "hash-tampered"
+      }
+    },
+    {
+      "case": "cross_episode_rejected_reuse",
+      "blocked": true,
+      "code": "REJECTED_ANCESTOR",
+      "message": "资产 ep02-take-x 的来源 ep01-take-a 属于被否决镜头，禁止混入后继集次",
+      "details": {
+        "candidate": "ep02-take-x",
+        "rejected_ancestor": "ep01-take-a"
+      }
+    },
+    {
+      "case": "submit_before_resign_after_reassessment",
+      "blocked": true,
+      "code": "NOT_SIGNED",
+      "message": "第 EP02 集尚未完成分类签署，不能送审"
+    }
+  ],
+  "callback_retry": {
+    "duplicate": true
+  },
+  "events": [
+    {
+      "event_id": "legacy-asset-001",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "asset-legacy-001",
+      "occurred_at": "2026-09-21T09:01:00+08:00",
+      "version": 1,
+      "summary": "v1 遗留资产"
+    },
+    {
+      "event_id": "legacy-cut-001",
+      "event_type": "CUT_SEALED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "ep-legacy",
+      "occurred_at": "2026-09-21T09:02:00+08:00",
+      "version": 1,
+      "summary": "v1 遗留成片"
+    },
+    {
+      "event_id": "legacy-tier-001",
+      "event_type": "TIER_ASSESSED",
+      "aggregate_type": "review_submission",
+      "aggregate_id": "rs-legacy",
+      "occurred_at": "2026-09-21T09:03:00+08:00",
+      "version": 1,
+      "summary": "v1 遗留档位评估"
+    },
+    {
+      "event_id": "legacy-decision-001",
+      "event_type": "REVIEW_DECIDED",
+      "aggregate_type": "review_submission",
+      "aggregate_id": "rs-legacy",
+      "occurred_at": "2026-09-21T09:04:00+08:00",
+      "version": 2,
+      "summary": "v1 遗留审核决定",
+      "actor": {
+        "person_id": "p-legacy-officer"
+      }
+    },
+    {
+      "event_id": "legacy-delivery-001",
+      "event_type": "RELEASE_DELIVERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "ep-legacy",
+      "occurred_at": "2026-09-21T09:05:00+08:00",
+      "version": 2,
+      "summary": "v1 遗留交付"
+    },
+    {
+      "event_id": "ev-rights-cd01",
+      "event_type": "SCRIPT_RIGHTS_REGISTERED",
+      "aggregate_type": "script_rights",
+      "aggregate_id": "script-cd-01",
+      "occurred_at": "2026-09-21T09:06:00+08:00",
+      "version": 1,
+      "summary": "登记剧本权利：长安谍影",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "script_id": "script-cd-01",
+        "title": "长安谍影",
+        "right_holder": "制片方A",
+        "authors": [
+          "编剧Z"
+        ],
+        "license_scope": "exclusive_av_remake",
+        "territories": [
+          "CN",
+          "ROW"
+        ],
+        "expires_at": "2031-12-31",
+        "doc_hash": "hash-rights-cd01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-freeze-1",
+      "event_type": "PRODUCTION_SCOPE_FROZEN",
+      "aggregate_type": "production_scope",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:07:00+08:00",
+      "version": 1,
+      "summary": "冻结第 EP01 集题材与投资口径",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "series_id": "series-cd-01",
+        "program_id": "PRG-CD-01",
+        "genre": "other",
+        "investment_amount": 800000,
+        "currency": "CNY"
+      }
+    },
+    {
+      "event_id": "EP01-path-suggested-1",
+      "event_type": "REVIEW_PATH_SUGGESTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:07:00+08:00",
+      "version": 2,
+      "summary": "系统建议路径：platform_self_review（最终分类待有权人员签署）",
+      "causation_id": "ev-ep01-freeze-1",
+      "correlation_id": "EP01",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "suggested_path": "platform_self_review",
+        "reasons": [],
+        "based_on": {
+          "genre": "other",
+          "investment_amount": 800000,
+          "currency": "CNY",
+          "frozen_at": "2026-09-21T09:07:00+08:00"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep01-ref-1",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ref-lin-face-01",
+      "occurred_at": "2026-09-21T09:08:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ref-lin-face-01（personal_reference）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ref-lin-face-01",
+        "kind": "personal_reference",
+        "uri": null,
+        "content_hash": "hash-ref-01",
+        "model": null,
+        "prompt_summary": "演员本人照片（个人素材，禁对外）",
+        "prompt_input_ref": null,
+        "personal_reference": true,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-prompt-char",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "prompt-char-a-01",
+      "occurred_at": "2026-09-21T09:09:00+08:00",
+      "version": 1,
+      "summary": "生成资产 prompt-char-a-01（prompt_input）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "prompt-char-a-01",
+        "kind": "prompt_input",
+        "uri": null,
+        "content_hash": "hash-prompt-char-01",
+        "model": null,
+        "prompt_summary": "未采用的角色提示词草稿 v0",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-chara-v1",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "char-a-v1",
+      "occurred_at": "2026-09-21T09:10:00+08:00",
+      "version": 1,
+      "summary": "生成资产 char-a-v1（character_sheet）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "correlation_id": "EP01",
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "char-a-v1",
+        "kind": "character_sheet",
+        "uri": null,
+        "content_hash": "hash-char-a-v1",
+        "model": {
+          "name": "img-gen",
+          "version": "v3.1",
+          "provider": "internal"
+        },
+        "prompt_summary": "沈彦角色定稿：圆领袍、刀痕眉",
+        "prompt_input_ref": "prompt-char-a-02",
+        "personal_reference": false,
+        "source_asset_ids": [
+          "ref-lin-face-01"
+        ],
+        "character_id": "char-a",
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-baseline-a",
+      "event_type": "CHARACTER_BASELINE_LOCKED",
+      "aggregate_type": "character_baseline",
+      "aggregate_id": "char-a",
+      "occurred_at": "2026-09-21T09:11:00+08:00",
+      "version": 1,
+      "summary": "锁定角色 char-a 连续性基线（集 EP01）",
+      "actor": {
+        "person_id": "p-su",
+        "display_name": "苏禾（连续性总监）",
+        "roles": [
+          "continuity_supervisor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "character_id": "char-a",
+        "name": "沈彦",
+        "baseline_asset_id": "char-a-v1",
+        "baseline_hash": "hash-char-a-v1",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-plate-street",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "plate-street-01",
+      "occurred_at": "2026-09-21T09:12:00+08:00",
+      "version": 1,
+      "summary": "生成资产 plate-street-01（scene_plate）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "plate-street-01",
+        "kind": "scene_plate",
+        "uri": null,
+        "content_hash": "hash-plate-street",
+        "model": {
+          "name": "img-gen",
+          "version": "v3.1"
+        },
+        "prompt_summary": "长安西市夜街场景板",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-shot01-req",
+      "event_type": "SHOT_REGENERATION_REQUESTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-01",
+      "occurred_at": "2026-09-21T09:13:00+08:00",
+      "version": 1,
+      "summary": "请求重生成镜头 ep01-shot-01（父镜头 null）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "new_shot_id": "ep01-shot-01",
+        "parent_shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-a",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-take-a",
+      "occurred_at": "2026-09-21T09:14:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep01-take-a（shot_take）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "idempotency_key": "cb-ep01-take-a",
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-take-a",
+        "kind": "shot_take",
+        "uri": null,
+        "content_hash": "hash-take-a-bad",
+        "model": {
+          "name": "video-gen",
+          "version": "v12"
+        },
+        "prompt_summary": "夜街追逐第一版（含违规元素）",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [
+          "char-a-v1",
+          "plate-street-01"
+        ],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": "ep01-shot-01",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-a-reject",
+      "event_type": "SHOT_REJECTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-01",
+      "occurred_at": "2026-09-21T09:15:00+08:00",
+      "version": 2,
+      "summary": "镜头 ep01-shot-01 被否决：safety_policy",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "shot_id": "ep01-shot-01",
+        "episode_id": "EP01",
+        "asset_id": "ep01-take-a",
+        "asset_hash": "hash-take-a-bad",
+        "reason": "safety_policy",
+        "note": "危险动作模仿风险"
+      }
+    },
+    {
+      "event_id": "ev-ep01-shot02-req",
+      "event_type": "SHOT_REGENERATION_REQUESTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-02",
+      "occurred_at": "2026-09-21T09:16:00+08:00",
+      "version": 1,
+      "summary": "请求重生成镜头 ep01-shot-02（父镜头 ep01-shot-01）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "new_shot_id": "ep01-shot-02",
+        "parent_shot_id": "ep01-shot-01",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-b",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-take-b",
+      "occurred_at": "2026-09-21T09:17:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep01-take-b（shot_take）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "idempotency_key": "cb-ep01-take-b",
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-take-b",
+        "kind": "shot_take",
+        "uri": null,
+        "content_hash": "hash-take-b",
+        "model": {
+          "name": "video-gen",
+          "version": "v12.1"
+        },
+        "prompt_summary": "夜街追逐第二版（已消除违规元素）",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [
+          "char-a-v1",
+          "plate-street-01"
+        ],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": "ep01-shot-02",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-b-accept",
+      "event_type": "TAKE_ACCEPTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-02",
+      "occurred_at": "2026-09-21T09:18:00+08:00",
+      "version": 2,
+      "summary": "镜头 ep01-shot-02 采用资产 ep01-take-b",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "shot_id": "ep01-shot-02",
+        "asset_id": "ep01-take-b",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-voice-1",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-voice-01",
+      "occurred_at": "2026-09-21T09:20:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep01-voice-01（voice）",
+      "actor": {
+        "person_id": "p-yin",
+        "display_name": "殷声（配音）",
+        "roles": [
+          "voice_artist"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-voice-01",
+        "kind": "voice",
+        "uri": null,
+        "content_hash": "hash-voice-01",
+        "model": null,
+        "prompt_summary": "主角配音第一集",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-voice-link",
+      "event_type": "VOICE_MUSIC_LINKED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-voice-01",
+      "occurred_at": "2026-09-21T09:21:00+08:00",
+      "version": 2,
+      "summary": "关联配音：EP01 主角配音",
+      "actor": {
+        "person_id": "p-yin",
+        "display_name": "殷声（配音）",
+        "roles": [
+          "voice_artist"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-voice-01",
+        "audio_kind": "voice",
+        "title": "EP01 主角配音",
+        "contributor_id": "p-yin",
+        "source": "studio-recorded",
+        "license_doc_hash": "hash-voice-license"
+      }
+    },
+    {
+      "event_id": "ev-ep01-music-1",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-music-01",
+      "occurred_at": "2026-09-21T09:22:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep01-music-01（music）",
+      "actor": {
+        "person_id": "p-qu",
+        "display_name": "曲谱（作曲）",
+        "roles": [
+          "music_composer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-music-01",
+        "kind": "music",
+        "uri": null,
+        "content_hash": "hash-music-01",
+        "model": null,
+        "prompt_summary": "EP01 片尾配乐",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-music-link",
+      "event_type": "VOICE_MUSIC_LINKED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-music-01",
+      "occurred_at": "2026-09-21T09:23:00+08:00",
+      "version": 2,
+      "summary": "关联音乐：《西市灯》",
+      "actor": {
+        "person_id": "p-qu",
+        "display_name": "曲谱（作曲）",
+        "roles": [
+          "music_composer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-music-01",
+        "audio_kind": "music",
+        "title": "《西市灯》",
+        "contributor_id": "p-qu",
+        "source": "original-work",
+        "license_doc_hash": "hash-music-license"
+      }
+    },
+    {
+      "event_id": "ev-ep01-contr-lin",
+      "event_type": "CONTRIBUTION_LEDGERED",
+      "aggregate_type": "contribution_entry",
+      "aggregate_id": "contr-ep01-lin",
+      "occurred_at": "2026-09-21T09:24:00+08:00",
+      "version": 1,
+      "summary": "林一（兼导演/分镜/生成/剪辑） 贡献入账：director、storyboard_artist、generation_operator、editor",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "entry_id": "contr-ep01-lin",
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "episode_id": "EP01",
+        "asset_ids": [
+          "ep01-take-b",
+          "char-a-v1",
+          "plate-street-01"
+        ],
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ],
+        "revenue_share_bps": 400,
+        "note": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-contr-yin",
+      "event_type": "CONTRIBUTION_LEDGERED",
+      "aggregate_type": "contribution_entry",
+      "aggregate_id": "contr-ep01-yin",
+      "occurred_at": "2026-09-21T09:25:00+08:00",
+      "version": 1,
+      "summary": "殷声（配音） 贡献入账：voice_artist",
+      "actor": {
+        "person_id": "p-yin",
+        "display_name": "殷声（配音）",
+        "roles": [
+          "voice_artist"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "entry_id": "contr-ep01-yin",
+        "person_id": "p-yin",
+        "display_name": "殷声（配音）",
+        "episode_id": "EP01",
+        "asset_ids": [
+          "ep01-voice-01"
+        ],
+        "roles": [
+          "voice_artist"
+        ],
+        "revenue_share_bps": 100,
+        "note": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-contr-qu",
+      "event_type": "CONTRIBUTION_LEDGERED",
+      "aggregate_type": "contribution_entry",
+      "aggregate_id": "contr-ep01-qu",
+      "occurred_at": "2026-09-21T09:26:00+08:00",
+      "version": 1,
+      "summary": "曲谱（作曲） 贡献入账：music_composer",
+      "actor": {
+        "person_id": "p-qu",
+        "display_name": "曲谱（作曲）",
+        "roles": [
+          "music_composer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "entry_id": "contr-ep01-qu",
+        "person_id": "p-qu",
+        "display_name": "曲谱（作曲）",
+        "episode_id": "EP01",
+        "asset_ids": [
+          "ep01-music-01"
+        ],
+        "roles": [
+          "music_composer"
+        ],
+        "revenue_share_bps": 80,
+        "note": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-cost-gen",
+      "event_type": "COST_LEDGERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:27:00+08:00",
+      "version": 3,
+      "summary": "登记成本 12000 CNY（generation）",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "cost_id": "ev-ep01-cost-gen",
+        "amount": 12000,
+        "currency": "CNY",
+        "category": "generation",
+        "causal_event_id": "ev-ep01-take-b"
+      }
+    },
+    {
+      "event_id": "ev-ep01-cost-voice",
+      "event_type": "COST_LEDGERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:28:00+08:00",
+      "version": 4,
+      "summary": "登记成本 8000 CNY（voice）",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "cost_id": "ev-ep01-cost-voice",
+        "amount": 8000,
+        "currency": "CNY",
+        "category": "voice",
+        "causal_event_id": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-seal-1",
+      "event_type": "CUT_SEALED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:29:00+08:00",
+      "version": 5,
+      "summary": "第 EP01 集成片封版（3 个资产）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "program_id": "PRG-CD-01",
+        "asset_ids": [
+          "ep01-take-b",
+          "ep01-voice-01",
+          "ep01-music-01"
+        ],
+        "master": {
+          "hash": "hash-master-ep01-v1",
+          "uri": "s3://masters/EP01/v1.mp4",
+          "duration_seconds": 180,
+          "checksum_alg": "sha256"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep01-sign-1",
+      "event_type": "REVIEW_CLASSIFICATION_SIGNED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:30:00+08:00",
+      "version": 6,
+      "summary": "签署审核路径：platform_self_review",
+      "actor": {
+        "person_id": "p-he",
+        "display_name": "何律（分类签署人）",
+        "roles": [
+          "classification_officer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "path": "platform_self_review",
+        "advisory_override": false,
+        "justification": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-submit-1",
+      "event_type": "REVIEW_SUBMITTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:31:00+08:00",
+      "version": 7,
+      "summary": "第 EP01 集按 platform_self_review 提交送审",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "path": "platform_self_review",
+        "target_authority": "platform-review-desk",
+        "package_hash": "hash-master-ep01-v1"
+      }
+    },
+    {
+      "event_id": "ev-ep01-return-1",
+      "event_type": "REVIEW_RETURNED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:32:00+08:00",
+      "version": 8,
+      "summary": "第 EP01 集审核退回：需补对白字幕、片头署名不全",
+      "actor": {
+        "person_id": "p-jian",
+        "display_name": "省局经办人",
+        "roles": [
+          "review_authority"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "reasons": [
+          "需补对白字幕",
+          "片头署名不全"
+        ]
+      }
+    },
+    {
+      "event_id": "ev-ep01-amend-1",
+      "event_type": "PRODUCTION_SCOPE_AMENDED",
+      "aggregate_type": "production_scope",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:33:00+08:00",
+      "version": 9,
+      "summary": "修订第 EP01 集口径：investment_amount",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "investment_amount": 3200000,
+        "changed_fields": [
+          "investment_amount"
+        ],
+        "reason": "财务复核实际投资额上调"
+      }
+    },
+    {
+      "event_id": "EP01-reassess-scope-1",
+      "event_type": "REVIEW_REASSESSMENT_TRIGGERED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:33:00+08:00",
+      "version": 10,
+      "summary": "口径投资跨档，触发重审",
+      "causation_id": "ev-ep01-amend-1",
+      "correlation_id": "EP01",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "trigger": "scope_amended",
+        "before_path": "platform_self_review",
+        "reason": {
+          "genreChanged": false,
+          "beforeBand": 0,
+          "afterBand": 1
+        }
+      }
+    },
+    {
+      "event_id": "EP01-path-resuggested-1",
+      "event_type": "REVIEW_PATH_SUGGESTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:33:00+08:00",
+      "version": 11,
+      "summary": "口径修订后系统重新建议路径（仍须人工签署）",
+      "causation_id": "EP01-reassess-scope-1",
+      "correlation_id": "EP01",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "suggested_path": "provincial_administration_submission",
+        "reasons": [
+          {
+            "code": "investment_band",
+            "band": 1,
+            "amount": 3200000
+          }
+        ],
+        "based_on": {
+          "genre": "other",
+          "investment_amount": 3200000,
+          "currency": "CNY",
+          "frozen_at": "2026-09-21T09:33:00+08:00"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep01-amend-2",
+      "event_type": "PRODUCTION_SCOPE_AMENDED",
+      "aggregate_type": "production_scope",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:34:00+08:00",
+      "version": 12,
+      "summary": "修订第 EP01 集口径：investment_amount",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "investment_amount": 3250000,
+        "changed_fields": [
+          "investment_amount"
+        ],
+        "reason": "杂项追加"
+      }
+    },
+    {
+      "event_id": "ev-ep01-shot03-req",
+      "event_type": "SHOT_REGENERATION_REQUESTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-03",
+      "occurred_at": "2026-09-21T09:35:00+08:00",
+      "version": 1,
+      "summary": "请求重生成镜头 ep01-shot-03（父镜头 ep01-shot-02）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "new_shot_id": "ep01-shot-03",
+        "parent_shot_id": "ep01-shot-02",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-b2",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep01-take-b2",
+      "occurred_at": "2026-09-21T09:36:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep01-take-b2（shot_take）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "idempotency_key": "cb-ep01-take-b2",
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep01-take-b2",
+        "kind": "shot_take",
+        "uri": null,
+        "content_hash": "hash-take-b2",
+        "model": {
+          "name": "video-gen",
+          "version": "v12.1"
+        },
+        "prompt_summary": "夜街追逐第三版：补字幕安全区、修正署名卡",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [
+          "ep01-take-b"
+        ],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": "ep01-shot-03",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-b2-revise",
+      "event_type": "SHOT_MANUALLY_REVISED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-03",
+      "occurred_at": "2026-09-21T09:37:00+08:00",
+      "version": 2,
+      "summary": "人工修订镜头 ep01-shot-03 → 资产 ep01-take-b2",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "shot_id": "ep01-shot-03",
+        "episode_id": "EP01",
+        "revised_asset_id": "ep01-take-b2",
+        "note": "剪辑手工调整字幕节奏与署名卡时长"
+      }
+    },
+    {
+      "event_id": "ev-ep01-cost-edit",
+      "event_type": "COST_LEDGERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:38:00+08:00",
+      "version": 13,
+      "summary": "登记成本 3000 CNY（manual_revision）",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "cost_id": "ev-ep01-cost-edit",
+        "amount": 3000,
+        "currency": "CNY",
+        "category": "manual_revision",
+        "causal_event_id": "ev-ep01-take-b2-revise"
+      }
+    },
+    {
+      "event_id": "ev-ep01-take-b2-accept",
+      "event_type": "TAKE_ACCEPTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep01-shot-03",
+      "occurred_at": "2026-09-21T09:39:00+08:00",
+      "version": 3,
+      "summary": "镜头 ep01-shot-03 采用资产 ep01-take-b2",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "shot_id": "ep01-shot-03",
+        "asset_id": "ep01-take-b2",
+        "episode_id": "EP01"
+      }
+    },
+    {
+      "event_id": "ev-ep01-seal-2",
+      "event_type": "CUT_SEALED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:40:00+08:00",
+      "version": 14,
+      "summary": "第 EP01 集成片封版（3 个资产）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "program_id": "PRG-CD-01",
+        "asset_ids": [
+          "ep01-take-b2",
+          "ep01-voice-01",
+          "ep01-music-01"
+        ],
+        "master": {
+          "hash": "hash-master-ep01-v2",
+          "uri": "s3://masters/EP01/v2.mp4",
+          "duration_seconds": 182,
+          "checksum_alg": "sha256"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep01-sign-2",
+      "event_type": "REVIEW_CLASSIFICATION_SIGNED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:41:00+08:00",
+      "version": 15,
+      "summary": "签署审核路径：provincial_administration_submission",
+      "actor": {
+        "person_id": "p-he",
+        "display_name": "何律（分类签署人）",
+        "roles": [
+          "classification_officer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "path": "provincial_administration_submission",
+        "advisory_override": false,
+        "justification": null
+      }
+    },
+    {
+      "event_id": "ev-ep01-submit-2",
+      "event_type": "REVIEW_SUBMITTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:42:00+08:00",
+      "version": 16,
+      "summary": "第 EP01 集按 provincial_administration_submission 提交送审",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "path": "provincial_administration_submission",
+        "target_authority": "省广电局政务窗口",
+        "package_hash": "hash-master-ep01-v2"
+      }
+    },
+    {
+      "event_id": "ev-ep01-approve-1",
+      "event_type": "REVIEW_APPROVED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP01",
+      "occurred_at": "2026-09-21T09:43:00+08:00",
+      "version": 17,
+      "summary": "第 EP01 集审核通过（母版 hash-master-ep01-v2）",
+      "actor": {
+        "person_id": "p-jian",
+        "display_name": "省局经办人",
+        "roles": [
+          "review_authority"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP01",
+        "master_hash": "hash-master-ep01-v2",
+        "approval_doc_hash": "hash-approval-ep01-1"
+      }
+    },
+    {
+      "event_id": "ev-ep01-pkg-1",
+      "event_type": "RELEASE_PACKAGE_PUBLISHED",
+      "aggregate_type": "release_package",
+      "aggregate_id": "pkg-ep01-domestic",
+      "occurred_at": "2026-09-21T09:44:00+08:00",
+      "version": 1,
+      "summary": "发行包 pkg-ep01-domestic 放行（节目 PRG-CD-01）",
+      "actor": {
+        "person_id": "p-fang",
+        "display_name": "方放行",
+        "roles": [
+          "release_manager"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "package_id": "pkg-ep01-domestic",
+        "program_id": "PRG-CD-01",
+        "episode_id": "EP01",
+        "master": {
+          "hash": "hash-master-ep01-v2",
+          "uri": "s3://masters/EP01/v2.mp4",
+          "duration_seconds": 182,
+          "checksum_alg": "sha256"
+        },
+        "rights_proofs": [
+          {
+            "script_id": "script-cd-01",
+            "doc_hash": "hash-rights-cd01",
+            "license_scope": "exclusive_av_remake",
+            "territories": [
+              "CN",
+              "ROW"
+            ],
+            "expires_at": "2031-12-31"
+          }
+        ]
+      }
+    },
+    {
+      "event_id": "ev-ep01-grant-1",
+      "event_type": "RELEASE_ACCESS_GRANTED",
+      "aggregate_type": "release_package",
+      "aggregate_id": "pkg-ep01-domestic",
+      "occurred_at": "2026-09-21T09:45:00+08:00",
+      "version": 2,
+      "summary": "向 短视频发行平台 交付发行包 pkg-ep01-domestic",
+      "actor": {
+        "person_id": "p-fang",
+        "display_name": "方放行",
+        "roles": [
+          "release_manager"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "package_id": "pkg-ep01-domestic",
+        "receiver_id": "plat-shortv",
+        "receiver_name": "短视频发行平台",
+        "scope": "master_delivery"
+      }
+    },
+    {
+      "event_id": "ev-ep02-freeze-1",
+      "event_type": "PRODUCTION_SCOPE_FROZEN",
+      "aggregate_type": "production_scope",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:46:00+08:00",
+      "version": 1,
+      "summary": "冻结第 EP02 集题材与投资口径",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "series_id": "series-cd-01",
+        "program_id": "PRG-CD-02",
+        "genre": "other",
+        "investment_amount": 2800000,
+        "currency": "CNY"
+      }
+    },
+    {
+      "event_id": "EP02-path-suggested-1",
+      "event_type": "REVIEW_PATH_SUGGESTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:46:00+08:00",
+      "version": 2,
+      "summary": "系统建议路径：platform_self_review（最终分类待有权人员签署）",
+      "causation_id": "ev-ep02-freeze-1",
+      "correlation_id": "EP02",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "suggested_path": "platform_self_review",
+        "reasons": [],
+        "based_on": {
+          "genre": "other",
+          "investment_amount": 2800000,
+          "currency": "CNY",
+          "frozen_at": "2026-09-21T09:46:00+08:00"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep02-chara-v2",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "char-a-v2",
+      "occurred_at": "2026-09-21T09:50:00+08:00",
+      "version": 1,
+      "summary": "生成资产 char-a-v2（character_sheet）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "char-a-v2",
+        "kind": "character_sheet",
+        "uri": null,
+        "content_hash": "hash-char-a-v2",
+        "model": {
+          "name": "img-gen",
+          "version": "v3.1"
+        },
+        "prompt_summary": "沈彦第二集造型（冬装），连续性基线一致",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [
+          "char-a-v1"
+        ],
+        "character_id": "char-a",
+        "continuity_base": {
+          "character_id": "char-a",
+          "baseline_hash": "hash-char-a-v1"
+        },
+        "shot_id": null,
+        "episode_id": "EP02"
+      }
+    },
+    {
+      "event_id": "ev-ep02-shot01-req",
+      "event_type": "SHOT_REGENERATION_REQUESTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep02-shot-01",
+      "occurred_at": "2026-09-21T09:51:00+08:00",
+      "version": 1,
+      "summary": "请求重生成镜头 ep02-shot-01（父镜头 null）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "new_shot_id": "ep02-shot-01",
+        "parent_shot_id": null,
+        "episode_id": "EP02"
+      }
+    },
+    {
+      "event_id": "ev-ep02-take-a",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep02-take-a",
+      "occurred_at": "2026-09-21T09:52:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep02-take-a（shot_take）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "idempotency_key": "cb-ep02-take-a",
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep02-take-a",
+        "kind": "shot_take",
+        "uri": null,
+        "content_hash": "hash-ep02-take-a",
+        "model": {
+          "name": "video-gen",
+          "version": "v12.1"
+        },
+        "prompt_summary": "EP02 开场镜头",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [
+          "char-a-v2",
+          "plate-street-01"
+        ],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": "ep02-shot-01",
+        "episode_id": "EP02"
+      }
+    },
+    {
+      "event_id": "ev-ep02-take-accept",
+      "event_type": "TAKE_ACCEPTED",
+      "aggregate_type": "shot",
+      "aggregate_id": "ep02-shot-01",
+      "occurred_at": "2026-09-21T09:53:00+08:00",
+      "version": 2,
+      "summary": "镜头 ep02-shot-01 采用资产 ep02-take-a",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "shot_id": "ep02-shot-01",
+        "asset_id": "ep02-take-a",
+        "episode_id": "EP02"
+      }
+    },
+    {
+      "event_id": "ev-ep02-cost-1",
+      "event_type": "COST_LEDGERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:54:00+08:00",
+      "version": 3,
+      "summary": "登记成本 2400000 CNY（generation）",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "cost_id": "ev-ep02-cost-1",
+        "amount": 2400000,
+        "currency": "CNY",
+        "category": "generation",
+        "causal_event_id": null
+      }
+    },
+    {
+      "event_id": "ev-ep02-cost-2",
+      "event_type": "COST_LEDGERED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:55:00+08:00",
+      "version": 4,
+      "summary": "登记成本 800000 CNY（postproduction）",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "cost_id": "ev-ep02-cost-2",
+        "amount": 800000,
+        "currency": "CNY",
+        "category": "postproduction",
+        "causal_event_id": null
+      }
+    },
+    {
+      "event_id": "EP02-reassess-cost-3200000",
+      "event_type": "REVIEW_REASSESSMENT_TRIGGERED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:55:00+08:00",
+      "version": 5,
+      "summary": "实际成本 3200000 跨入更高审核档位，触发重审",
+      "causation_id": "ev-ep02-cost-2",
+      "correlation_id": "EP02",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "trigger": "investment_threshold_crossed",
+        "before_path": null,
+        "reason": {
+          "from_band": 0,
+          "to_band": 1,
+          "actual_total": 3200000
+        }
+      }
+    },
+    {
+      "event_id": "EP02-path-resuggested-cost-3200000",
+      "event_type": "REVIEW_PATH_SUGGESTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:55:00+08:00",
+      "version": 6,
+      "summary": "实际成本跨档后系统重新建议路径（仍须人工签署）",
+      "causation_id": "EP02-reassess-cost-3200000",
+      "correlation_id": "EP02",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "suggested_path": "provincial_administration_submission",
+        "reasons": [
+          {
+            "code": "investment_band",
+            "band": 1,
+            "amount": 3200000
+          }
+        ],
+        "based_on": {
+          "genre": "other",
+          "investment_amount": 3200000,
+          "currency": "CNY",
+          "frozen_at": "2026-09-21T09:46:00+08:00"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep02-sign-1",
+      "event_type": "REVIEW_CLASSIFICATION_SIGNED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:56:00+08:00",
+      "version": 7,
+      "summary": "签署审核路径：provincial_administration_submission",
+      "actor": {
+        "person_id": "p-he",
+        "display_name": "何律（分类签署人）",
+        "roles": [
+          "classification_officer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "path": "provincial_administration_submission",
+        "advisory_override": false,
+        "justification": null
+      }
+    },
+    {
+      "event_id": "ev-ep02-voice-1",
+      "event_type": "ASSET_GENERATED",
+      "aggregate_type": "production_asset",
+      "aggregate_id": "ep02-voice-01",
+      "occurred_at": "2026-09-21T09:57:00+08:00",
+      "version": 1,
+      "summary": "生成资产 ep02-voice-01（voice）",
+      "actor": {
+        "person_id": "p-yin",
+        "display_name": "殷声（配音）",
+        "roles": [
+          "voice_artist"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "asset_id": "ep02-voice-01",
+        "kind": "voice",
+        "uri": null,
+        "content_hash": "hash-ep02-voice",
+        "model": null,
+        "prompt_summary": "EP02 配音",
+        "prompt_input_ref": null,
+        "personal_reference": false,
+        "source_asset_ids": [],
+        "character_id": null,
+        "continuity_base": null,
+        "shot_id": null,
+        "episode_id": "EP02"
+      }
+    },
+    {
+      "event_id": "ev-ep02-seal-1",
+      "event_type": "CUT_SEALED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:58:00+08:00",
+      "version": 8,
+      "summary": "第 EP02 集成片封版（2 个资产）",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "program_id": "PRG-CD-02",
+        "asset_ids": [
+          "ep02-take-a",
+          "ep02-voice-01"
+        ],
+        "master": {
+          "hash": "hash-master-ep02-v1",
+          "uri": "s3://masters/EP02/v1.mp4",
+          "duration_seconds": 175
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep02-submit-1",
+      "event_type": "REVIEW_SUBMITTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T09:59:00+08:00",
+      "version": 9,
+      "summary": "第 EP02 集按 provincial_administration_submission 提交送审",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "path": "provincial_administration_submission",
+        "target_authority": "省广电局政务窗口",
+        "package_hash": "hash-master-ep02-v1"
+      }
+    },
+    {
+      "event_id": "ev-ep02-approve-1",
+      "event_type": "REVIEW_APPROVED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:00:00+08:00",
+      "version": 10,
+      "summary": "第 EP02 集审核通过（母版 hash-master-ep02-v1）",
+      "actor": {
+        "person_id": "p-jian",
+        "display_name": "省局经办人",
+        "roles": [
+          "review_authority"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "master_hash": "hash-master-ep02-v1",
+        "approval_doc_hash": "hash-approval-ep02-1"
+      }
+    },
+    {
+      "event_id": "ev-ep02-pkg-1",
+      "event_type": "RELEASE_PACKAGE_PUBLISHED",
+      "aggregate_type": "release_package",
+      "aggregate_id": "pkg-ep02-domestic",
+      "occurred_at": "2026-09-21T10:01:00+08:00",
+      "version": 1,
+      "summary": "发行包 pkg-ep02-domestic 放行（节目 PRG-CD-02）",
+      "actor": {
+        "person_id": "p-fang",
+        "display_name": "方放行",
+        "roles": [
+          "release_manager"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "package_id": "pkg-ep02-domestic",
+        "program_id": "PRG-CD-02",
+        "episode_id": "EP02",
+        "master": {
+          "hash": "hash-master-ep02-v1",
+          "uri": "s3://masters/EP02/v1.mp4",
+          "duration_seconds": 175,
+          "checksum_alg": "sha256"
+        },
+        "rights_proofs": [
+          {
+            "script_id": "script-cd-01",
+            "doc_hash": "hash-rights-cd01",
+            "license_scope": "exclusive_av_remake",
+            "territories": [
+              "CN",
+              "ROW"
+            ],
+            "expires_at": "2031-12-31"
+          }
+        ]
+      }
+    },
+    {
+      "event_id": "ev-ep02-master-intl",
+      "event_type": "MASTER_REPLACED",
+      "aggregate_type": "episode_cut",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:02:00+08:00",
+      "version": 11,
+      "summary": "第 EP02 集母版替换：海外版本",
+      "actor": {
+        "person_id": "p-lin",
+        "display_name": "林一（兼导演/分镜/生成/剪辑）",
+        "roles": [
+          "director",
+          "storyboard_artist",
+          "generation_operator",
+          "editor"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "previous_master_hash": "hash-master-ep02-v1",
+        "master": {
+          "hash": "hash-master-ep02-intl",
+          "uri": "s3://masters/EP02/intl.mp4",
+          "duration_seconds": 176
+        },
+        "asset_ids": [
+          "ep02-take-a",
+          "ep02-voice-01"
+        ],
+        "reason": "北美平台剪辑版",
+        "overseas_version": true
+      }
+    },
+    {
+      "event_id": "EP02-reassess-overseas_version_added-hash-master-",
+      "event_type": "REVIEW_REASSESSMENT_TRIGGERED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:02:00+08:00",
+      "version": 12,
+      "summary": "新增海外版本，新母版需重新审核",
+      "causation_id": "ev-ep02-master-intl",
+      "correlation_id": "EP02",
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "trigger": "overseas_version_added",
+        "before_path": "provincial_administration_submission",
+        "reason": {
+          "previous_master_hash": "hash-master-ep02-v1",
+          "new_master_hash": "hash-master-ep02-intl"
+        }
+      }
+    },
+    {
+      "event_id": "ev-ep02-sign-2",
+      "event_type": "REVIEW_CLASSIFICATION_SIGNED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:04:00+08:00",
+      "version": 13,
+      "summary": "签署审核路径：provincial_administration_submission",
+      "actor": {
+        "person_id": "p-he",
+        "display_name": "何律（分类签署人）",
+        "roles": [
+          "classification_officer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "path": "provincial_administration_submission",
+        "advisory_override": false,
+        "justification": null
+      }
+    },
+    {
+      "event_id": "ev-ep02-submit-2",
+      "event_type": "REVIEW_SUBMITTED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:05:00+08:00",
+      "version": 14,
+      "summary": "第 EP02 集按 provincial_administration_submission 提交送审",
+      "actor": {
+        "person_id": "p-chen",
+        "display_name": "陈制片",
+        "roles": [
+          "producer"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "path": "provincial_administration_submission",
+        "target_authority": "省广电局政务窗口",
+        "package_hash": "hash-master-ep02-intl"
+      }
+    },
+    {
+      "event_id": "ev-ep02-approve-2",
+      "event_type": "REVIEW_APPROVED",
+      "aggregate_type": "episode_review",
+      "aggregate_id": "EP02",
+      "occurred_at": "2026-09-21T10:06:00+08:00",
+      "version": 15,
+      "summary": "第 EP02 集审核通过（母版 hash-master-ep02-intl）",
+      "actor": {
+        "person_id": "p-jian",
+        "display_name": "省局经办人",
+        "roles": [
+          "review_authority"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "episode_id": "EP02",
+        "master_hash": "hash-master-ep02-intl",
+        "approval_doc_hash": "hash-approval-ep02-2"
+      }
+    },
+    {
+      "event_id": "ev-ep02-pkg-intl",
+      "event_type": "RELEASE_PACKAGE_PUBLISHED",
+      "aggregate_type": "release_package",
+      "aggregate_id": "pkg-ep02-intl",
+      "occurred_at": "2026-09-21T10:07:00+08:00",
+      "version": 1,
+      "summary": "发行包 pkg-ep02-intl 放行（节目 PRG-CD-02-I）",
+      "actor": {
+        "person_id": "p-fang",
+        "display_name": "方放行",
+        "roles": [
+          "release_manager"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "package_id": "pkg-ep02-intl",
+        "program_id": "PRG-CD-02-I",
+        "episode_id": "EP02",
+        "master": {
+          "hash": "hash-master-ep02-intl",
+          "uri": "s3://masters/EP02/intl.mp4",
+          "duration_seconds": 176,
+          "checksum_alg": "sha256"
+        },
+        "rights_proofs": [
+          {
+            "script_id": "script-cd-01",
+            "doc_hash": "hash-rights-cd01",
+            "license_scope": "exclusive_av_remake",
+            "territories": [
+              "CN",
+              "ROW"
+            ],
+            "expires_at": "2031-12-31"
+          }
+        ]
+      }
+    },
+    {
+      "event_id": "ev-ep02-grant-intl",
+      "event_type": "RELEASE_ACCESS_GRANTED",
+      "aggregate_type": "release_package",
+      "aggregate_id": "pkg-ep02-intl",
+      "occurred_at": "2026-09-21T10:08:00+08:00",
+      "version": 2,
+      "summary": "向 海外流媒体平台 交付发行包 pkg-ep02-intl",
+      "actor": {
+        "person_id": "p-fang",
+        "display_name": "方放行",
+        "roles": [
+          "release_manager"
+        ]
+      },
+      "payload": {
+        "schema_version": 2,
+        "package_id": "pkg-ep02-intl",
+        "receiver_id": "plat-overseas",
+        "receiver_name": "海外流媒体平台",
+        "scope": "master_delivery"
+      }
+    }
+  ]
+}
